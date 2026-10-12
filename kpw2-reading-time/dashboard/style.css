@@ -1,0 +1,226 @@
+/* KPW2 reading dashboard - faithful port of the KPW5 "native reading time"
+   optimized dashboard (L-1116, ui-calendar templates, 1272x1696 design
+   canvas) scaled to the KPW2 758x1024 screen by x0.596.
+   Black-and-white e-ink, no scrolling: every page fits one screen. */
+*{margin:0;padding:0;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{width:758px;height:1024px;margin:0;background:#fff;color:#1a1a1a;font-family:"Noto Sans CJK SC","Noto Sans SC",sans-serif;overflow:hidden}
+/* old WebKit (mesquite) draws a default 2px button frame ON TOP of our border,
+   which made buttons look twice as thick as the div-based cards. Kill it. */
+button{-webkit-appearance:none;appearance:none;font-family:inherit;cursor:pointer;background-image:none}
+.hidden{display:none}
+
+/* outer frame: template border is at 10px inset, radius 20/0.596=32px */
+#frame{position:absolute;left:10px;top:10px;width:738px;height:978px;background:#fff;overflow:hidden;visibility:hidden}
+#frame.ready{visibility:visible}
+
+/* ---------- header ---------- */
+#appTitle{position:absolute;left:0;right:0;top:26px;text-align:center;font-size:34px;font-weight:bold}
+
+/* tabs: logical y165-275 -> y98-164; active = solid black + white text */
+.tab{position:absolute;top:84px;height:62px;border:2px solid #1a1a1a;border-radius:16px;background:#fff;color:#1a1a1a;font-size:26px;font-weight:bold}
+#tab-daily{left:9px;width:226px}
+#tab-books{left:244px;width:221px}
+#tab-total{left:474px;width:251px}
+.tab.active{background:#1a1a1a;color:#fff}
+
+/* pages live below the tabs */
+.page{position:absolute;left:0;top:158px;width:734px;height:820px}
+.page-full{top:0;height:978px;background:#fff;z-index:5}
+.card{position:absolute;border:2px solid #1a1a1a;border-radius:16px;background:#fff}
+
+/* ---------- shared controls ---------- */
+.nv{position:absolute;border:2px solid #1a1a1a;border-radius:12px;background:#fff;color:#1a1a1a;font-size:26px;font-weight:bold;text-align:center;padding:0}
+.tgl,.fbtn{position:absolute;border:2px solid #1a1a1a;border-radius:10px;background:#fff;color:#1a1a1a;font-size:17px;font-weight:bold;text-align:center;padding:0}
+/* 文字必须在按钮里上下居中：mesquite 的按钮不会自动居中文字，
+   靠 line-height = 内容高度（height 减上下边框各 2px）顶到正中 */
+.tgl{line-height:44px}
+.fbtn{line-height:28px}
+.tgl.active,.fbtn.active{background:#1a1a1a;color:#fff}
+.mini-btn{position:absolute;width:83px;height:32px;border:2px solid #1a1a1a;border-radius:8px;background:#fff;color:#1a1a1a;font-size:18px;font-weight:bold;text-align:center;padding:0}
+
+/* ---------- 每日时长 ---------- */
+#calCard{left:21px;top:12px;width:692px;height:522px}
+/* 月份标题和左右箭头必须同一条水平中线。箭头是 height:50 的按钮（mesquite 会把
+   按钮文字在按钮内垂直居中），所以标题也用完全相同的盒子：top:20 + height:50 +
+   line-height:50 → 两者中线都落在 45，和浏览器默认行高无关（之前标题用普通 div，
+   默认行高偏小、字看着“偏上”）。 */
+#monthTitle{position:absolute;left:0;right:0;top:20px;height:50px;line-height:50px;text-align:center;font-size:26px;font-weight:bold}
+#monthPrev{left:127px;top:20px;width:108px;height:50px;line-height:46px}
+#monthNext{left:464px;top:20px;width:108px;height:50px;line-height:46px}
+#weekRow{position:absolute;left:12px;top:82px;width:668px;height:20px}
+#weekRow span{position:absolute;top:0;width:95px;text-align:center;font-size:18px;color:#222}
+#calGrid{position:absolute;left:12px;top:106px;width:668px;height:374px}
+.cal-box{position:absolute;border:1px solid #333;border-radius:6px;background:#fff;overflow:hidden}
+.cal-sel{box-shadow:inset 0 0 0 2px #1a1a1a}
+.cal-ink-w{color:#fff}
+/* 日期居中：不再用固定 margin-top + 时长绝对贴底（那样日期永远不居中）。
+   .cal-in 由 JS 按格子实际高度算 padding-top：有时长时两行(26+2+18=46)整组居中，
+   无时长时单行(26)居中。line-height 必须写死，mesquite 才算得准。 */
+.cal-in{display:block;text-align:center}
+.cal-day{display:block;text-align:center;font-size:21px;font-weight:bold;line-height:26px}
+.cal-min{display:block;text-align:center;font-size:14px;line-height:18px;margin-top:2px}
+#calDivider{position:absolute;left:12px;top:488px;width:668px;border-top:1px solid #bebebe}
+#monthSummary{position:absolute;left:12px;top:496px;font-size:15px;color:#222}
+
+#dayCard{left:21px;top:558px;width:692px;height:242px}
+#dayCardTitle{position:absolute;left:12px;top:10px;font-size:20px;font-weight:bold}
+#dayCardTotal{position:absolute;right:12px;top:11px;font-size:19px;font-weight:bold}
+#dayCardRows{position:absolute;left:0;top:39px;width:692px}
+.dc-row{position:relative;height:57px}
+.dc-row .t{position:absolute;left:20px;top:14px;right:150px;font-size:16px;white-space:nowrap;overflow:hidden}
+.dc-row .s{position:absolute;right:12px;top:16px;font-size:14px;color:#222}
+.dc-empty{position:absolute;left:12px;top:6px;font-size:19px}
+.dc-pager-prev{left:191px;top:190px}
+.dc-pager-next{left:400px;top:190px}
+#dayCard .mini-btn{position:absolute}
+#dcPageLabel{position:absolute;left:0;right:0;top:197px;text-align:center;font-size:16px}
+
+/* ---------- 阅读书籍 ---------- */
+/* 近7日/本月/今年：原来只有 32px 高，手指不好摁 → 加高到 48px（和「本周/今年」一样），
+   下面的书单卡整体上移补偿，保证三行书（3×215=645）和翻页按钮仍在同一屏内 */
+#bookFilters{position:absolute;left:30px;top:0;width:675px;height:56px}
+.fbtn{width:211px;height:48px;line-height:44px;font-size:19px}
+#bf-7d{left:0}
+#bf-month{left:232px}
+#bf-year{left:464px}
+#booksCard{left:30px;top:64px;width:675px;height:645px}
+.bk-row{position:absolute;left:0;width:675px;height:215px}
+.bk-div{position:absolute;left:15px;width:645px;border-top:1px solid #bebebe}
+.bk-cover{position:absolute;left:15px;top:20px;width:113px;height:170px;background:#ededed;border:1px solid #d0d0d0;border-radius:8px;overflow:hidden}
+.cover-img{background-color:#fff;background-repeat:no-repeat;background-position:center center;background-size:cover;-webkit-background-size:cover}
+/* 封面用真 <img>：max 尺寸约束=等比 contain，translate=绝对居中（老 WebKit 可靠） */
+/* 封面基线方案：左上角钉死 + 宽高拉满 100%。完全不用 transform/百分比
+   位移（mesquite 对 img 上的 translate 不可靠），老浏览器数学上不可能
+   露出框底灰色；JS 能算时再覆盖为等比铺满（像素坐标居中）。 */
+.cover-img img{position:absolute;left:0;top:0;width:100%;height:100%}
+/* 书名与封面齐平（顶部对齐）：
+   之前按"设备墨迹比桌面低"的假设把书名上提（top:16→14），结果实测反了——
+   KPW2 老内核里中文字形墨迹比桌面渲染偏【高】（大数字那次设备墨迹比桌面高约7px，
+   缩到 25px 字号约 3.8px）。所以书名 top:14 在设备上是比封面顶【更高】，
+   看着就是"没齐平、书名飘在上面"。正确做法：把书名盒子顶直接钉到封面顶（top:20），
+   盒对齐后设备墨迹≈封面顶，正好齐平。 */
+.bk-row .t{position:absolute;left:161px;top:20px;width:490px;height:58px;font-size:25px;font-weight:bold;line-height:28px;overflow:hidden}
+.bk-row .s{position:absolute;left:152px;top:116px;font-size:17px;color:#222}
+.bk-row .p{position:absolute;right:25px;top:117px;font-size:16px;font-weight:bold}
+.bk-row .np{position:absolute;right:25px;top:119px;font-size:14px;color:#222}
+.bk-bar{position:absolute;left:152px;top:150px;width:495px;height:11px;background:#cdcdcd}
+.bk-bar i{display:block;height:11px;background:#1a1a1a}
+#booksCard .bk-empty{position:absolute;left:0;right:0;top:290px;text-align:center;font-size:19px;color:#222}
+/* 底部翻页行：整体下移 28px（原来贴着卡片、下面空一大截）；页码文字 18→22px，
+   并且给页码一个和按钮一样高的盒子(52)+line-height:52，保证和左右按钮同一中线。 */
+#bookPage{position:absolute;left:0;right:0;top:740px;height:52px;line-height:52px;text-align:center;font-size:22px}
+.pager-btn{position:absolute;top:740px;width:150px;height:52px;border:2px solid #1a1a1a;border-radius:12px;background:#fff;color:#1a1a1a;font-size:22px;font-weight:bold}
+#bookPrev{left:44px}
+#bookNext{left:540px}
+
+/* ---------- 累计时长 ---------- */
+#sumCard{left:21px;top:14px;width:692px;height:168px}
+/* 标签行高写死 24 → 占 8..32；灰色分隔线在 112。两者之间 32..112 的中线是 72。
+   大数字用 line-height:54，行盒 top=46 → 行盒范围 46..100、中心 73；
+   行盒内的字形由 line-height 自动垂直居中，不再靠手算墨迹偏移。
+   （上一版 top=41，设备照片逐列实测：墨迹 46.9..85.4、中心 66.2，
+     距标签 18px / 距灰线 26.6px —— 明显偏上，这才是"还没居中"，
+     桌面渲染量出来的 19:19 骗了我：设备字形与桌面中文字体的墨迹偏移不同。）
+   写死 line-height 的目的：位置不再随内核默认行高漂移，设备上才算得准。
+   标签 #left 与 #bigTotal 同为 48（2026-10-13 按用户要求整体右移约一个"3"字宽）→ 两者左端严格齐平。
+   底部「阅读天数/阅读日均」放大到 22，并落在灰线(112)与卡片底(168)的正中。 */
+.card-label{position:absolute;left:48px;top:16px;font-size:20px;font-weight:bold;line-height:24px}
+#bigTotal{position:absolute;left:48px;top:54px;font-size:46px;font-weight:bold;line-height:54px}
+/* 灰线原来用 1px + #bebebe，在 KPW2 老内核上被抗锯齿摊薄到几乎看不见（设备照片里
+   整条线消失）。这里加粗到 2px、颜色加深到 #8f8f8f，保证墨水屏上肉眼可见。 */
+#sumDivider{position:absolute;left:14px;right:14px;top:112px;height:0;border-top:2px solid #808080}
+/* 「阅读天数 / 阅读日均」各占半栏、栏内居中 → 左右严格对称（原来用固定 left，
+   左项贴左、右项离右边很远，看起来就是"不居中"）。 */
+#sumDays{position:absolute;left:0;width:346px;top:126px;text-align:center;font-size:22px;font-weight:bold;line-height:22px}
+#sumAvg{position:absolute;left:346px;width:346px;top:126px;text-align:center;font-size:22px;font-weight:bold;line-height:22px}
+#chartCard{left:21px;top:213px;width:692px;height:524px}
+#tt-week{left:6px;top:4px;width:90px;height:48px}
+#tt-year{left:102px;top:4px;width:90px;height:48px}
+#tt-week,#tt-year{font-size:20px}
+#totalPrev{left:200px;top:4px;width:64px;height:48px}
+/* 右箭头再往右挪，给中间「10月X日 - 10月X日」的周期标题腾出宽度（卡片内容宽 688，
+   右箭头结束于 656，离右边框 32px，不会压到卡片边框） */
+#totalNext{left:592px;top:4px;width:64px;height:48px}
+/* 周期标题：高度和箭头对齐(48)、line-height=48 让文字在任何字号下都垂直居中；
+   左右边界取「两个箭头之间的正中间」，所以标题落在 272..584（中心 428）。 */
+#periodTitle{position:absolute;left:272px;right:104px;top:4px;height:48px;line-height:48px;text-align:center;font-weight:bold}
+#chart{position:absolute;left:12px;top:82px;width:668px;height:411px}
+.ch-grid{position:absolute;border-top:1px solid #bebebe}
+.ch-gridlabel{position:absolute;font-size:13px;color:#1a1a1a;text-align:right}
+.ch-base{position:absolute;border-bottom:2px solid #1a1a1a}
+.ch-bar{position:absolute;bottom:35px}
+.ch-val{position:absolute;font-size:13px;font-weight:bold;background:#fff;padding:0 2px;text-align:center}
+/* 底部「周一…周日」字号 14→17（用户要适度调大）；bottom 收到 2px，
+   给 17px 的字留够 25px 盒高，避免被 #chart 的 411px 高度裁掉下半截。 */
+.ch-axis{position:absolute;bottom:2px;font-size:17px;font-weight:bold;text-align:center}
+
+/* ---------- 阅读详情（day_detail） ---------- */
+#ddBack{position:absolute;left:14px;top:14px;width:122px;height:56px;border:2px solid #1a1a1a;border-radius:14px;background:#fff;color:#1a1a1a;font-size:24px;font-weight:bold}
+#ddTitle{position:absolute;left:0;right:0;top:26px;text-align:center;font-size:34px;font-weight:bold}
+#ddSummary{left:30px;top:110px;width:675px;height:179px}
+#ddDate{position:absolute;left:12px;top:11px;font-size:26px;font-weight:bold}
+#ddWeekday{position:absolute;left:12px;top:55px;font-size:18px;color:#222}
+#ddDivider{position:absolute;left:12px;right:12px;top:86px;border-top:1px solid #bebebe}
+.dd-cap{position:absolute;top:104px;font-size:16px;color:#222}
+#ddCap1{left:48px}
+#ddCap2{left:388px}
+#ddTotal{position:absolute;left:48px;top:134px;font-size:26px;font-weight:bold}
+#ddCount{position:absolute;left:388px;top:134px;font-size:26px;font-weight:bold}
+#ddList{left:30px;top:340px;width:675px;height:617px}
+#ddListHead{position:absolute;left:12px;top:9px;font-size:20px;font-weight:bold}
+#ddRows{position:absolute;left:0;top:60px;width:675px}
+.dd-row{position:absolute;left:0;width:675px;height:150px}
+.dd-cover{position:absolute;left:12px;top:8px;width:83px;height:125px;background:#ededed;border:1px solid #d0d0d0;border-radius:6px;overflow:hidden}
+.dd-row .t{position:absolute;left:167px;top:36px;width:330px;height:54px;font-size:22px;font-weight:bold;line-height:26px;overflow:hidden}
+.dd-row .s{position:absolute;right:19px;top:38px;font-size:18px;font-weight:bold}
+.dd-row .p{position:absolute;right:19px;top:70px;font-size:14px;color:#222}
+/* 每日明细：不再画进度条和行分隔线（单本书时它们会连成一条突兀的长线） */
+.dd-empty{position:absolute;left:0;right:0;top:200px;text-align:center;font-size:19px;color:#222}
+#ddPager .mini-btn{top:0}
+#ddPrev{left:191px}
+#ddNext{left:400px}
+#ddPageLabel{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:16px}
+#ddPager{position:absolute;left:0;top:554px;width:675px;height:32px}
+
+/* ---------- 本书详情（点书籍下钻，看这本书哪天读了多久） ---------- */
+#bdBack{position:absolute;left:14px;top:14px;width:122px;height:56px;border:2px solid #1a1a1a;border-radius:14px;background:#fff;color:#1a1a1a;font-size:24px;font-weight:bold}
+#bdTitle{position:absolute;left:0;right:0;top:26px;text-align:center;font-size:34px;font-weight:bold}
+#bdSummary{left:30px;top:98px;width:675px;height:290px}
+.bd-sum-cover{position:absolute;left:14px;top:82px;width:130px;height:182px;background:#ededed;border:1px solid #d0d0d0;border-radius:8px;overflow:hidden}
+#bdName{position:absolute;left:168px;top:14px;width:480px;height:60px;font-size:25px;font-weight:bold;line-height:30px;overflow:hidden}
+.bd-cap{position:absolute;font-size:16px;color:#222}
+.bd-val{position:absolute;font-size:26px;font-weight:bold}
+#bdCapT{left:168px;top:82px}
+#bdCapD{left:424px;top:82px}
+#bdValT{left:168px;top:104px}
+#bdValD{left:424px;top:104px}
+#bdCapF{left:168px;top:154px}
+#bdCapL{left:424px;top:154px}
+#bdValF{left:168px;top:176px}
+#bdValL{left:424px;top:176px}
+#bdCapM{left:168px;top:226px}
+#bdCapP{left:424px;top:226px}
+#bdValM{left:168px;top:248px}
+#bdValP{left:424px;top:248px}
+/* 下半部分改成「阅读日历」（对齐 KPW5「Kindle Reading Records Enhanced」的
+   书籍详情页）：整月热力格 + 可翻月 + 底部一行显示所选日期的时长。
+   原来是「每日阅读明细」列表，用户要求改成图一那样。 */
+#bdList{left:30px;top:418px;width:675px;height:539px}
+#bdListHead{position:absolute;left:12px;top:10px;height:28px;line-height:28px;font-size:20px;font-weight:bold}
+/* 月份标题与两个箭头同高同行（都 top:10 / height:28 / line-height 各自写死），
+   mesquite 下三者的水平中线都落在 24 → 不会出现"标题偏上"的老问题。
+   箭头不上边框（图一里就是两个裸的 ‹ ›），但仍保留 56x28 按钮当点击热区。 */
+#bdCalTitle{position:absolute;left:0;right:0;top:10px;height:28px;line-height:28px;text-align:center;font-size:22px;font-weight:bold}
+#bdCalPrev{position:absolute;left:146px;top:10px;width:56px;height:28px;line-height:24px;font-size:26px;font-weight:bold;color:#1a1a1a;background:#fff;border:none;text-align:center;padding:0}
+#bdCalNext{position:absolute;left:455px;top:10px;width:56px;height:28px;line-height:24px;font-size:26px;font-weight:bold;color:#1a1a1a;background:#fff;border:none;text-align:center;padding:0}
+#bdWeekRow{position:absolute;left:12px;top:58px;width:651px;height:20px}
+#bdWeekRow span{position:absolute;top:0;width:93px;text-align:center;font-size:17px;color:#222}
+#bdCalGrid{position:absolute;left:12px;top:82px;width:651px;height:364px}
+/* 分隔线用 2px + #8f8f8f：1px 浅灰在 KPW2 老内核上会被抗锯齿摊掉、看不见
+   （累计页那条灰线就栽在这上面）。 */
+#bdCalDivider{position:absolute;left:12px;top:470px;width:651px;border-top:2px solid #8f8f8f}
+#bdCalSummary{position:absolute;left:12px;right:12px;top:486px;height:40px;line-height:40px;text-align:center;font-size:20px;font-weight:bold}
+
+/* 详情页返回热区（左上角），压在"退出"之上，避免点返回被退出按钮吃掉 */
+#backZone{position:absolute;left:0;top:0;width:240px;height:100px;z-index:70}
+#ddBack,#bdBack{z-index:60}

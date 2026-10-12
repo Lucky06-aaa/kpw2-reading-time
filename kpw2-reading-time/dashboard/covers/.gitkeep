@@ -1,0 +1,2 @@
+# Keep the covers/ directory in git; real cover images are generated locally
+# by tools/extract_covers.py and are NOT committed (they contain your books).

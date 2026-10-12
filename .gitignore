@@ -1,0 +1,10 @@
+# Generated on the device / local PC — do not commit
+kpw2-reading-time/dashboard/covers/*.jpg
+kpw2-reading-time/dashboard/covers/*.png
+*.log
+*.tmp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp

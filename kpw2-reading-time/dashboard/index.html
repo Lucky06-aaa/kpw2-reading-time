@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=758">
+<title>阅读记录</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="frame">
+
+  <!-- top bar + tabs (same on all main pages, like the KPW5 ui-calendar templates) -->
+  <div id="appTitle">阅读记录</div>
+  <button class="tab" id="tab-daily"  data-act="tab:daily">每日时长</button>
+  <button class="tab" id="tab-books"  data-act="tab:books">阅读书籍</button>
+  <button class="tab" id="tab-total"  data-act="tab:total">累计时长</button>
+
+  <!-- ============ 每日时长 ============ -->
+  <div class="page hidden" id="page-daily">
+    <div class="card" id="calCard">
+      <span id="monthTitle">2026年10月</span>
+      <button class="nv" id="monthPrev" data-act="month:prev">&#8249;</button>
+      <button class="nv" id="monthNext" data-act="month:next">&#8250;</button>
+      <div id="weekRow"></div>
+      <div id="calGrid"></div>
+      <div id="calDivider"></div>
+      <div id="monthSummary">本月阅读 0 天  共 0分钟</div>
+    </div>
+    <div class="card" id="dayCard" data-act="dopen">
+      <span id="dayCardTitle">阅读详情  &#8250;</span>
+      <span id="dayCardTotal"></span>
+      <div id="dayCardRows"></div>
+    </div>
+  </div>
+
+  <!-- ============ 阅读书籍 ============ -->
+  <div class="page hidden" id="page-books">
+    <div id="bookFilters">
+      <button class="fbtn" id="bf-7d"    data-act="bf:7d">近7日</button>
+      <button class="fbtn" id="bf-month" data-act="bf:month">本月</button>
+      <button class="fbtn" id="bf-year"  data-act="bf:year">今年</button>
+    </div>
+    <div class="card" id="booksCard">
+      <div id="bookRows"></div>
+    </div>
+    <div id="bookPage">第 1 页，共 1 页</div>
+    <button class="pager-btn" id="bookPrev" data-act="bpg:prev">上一页</button>
+    <button class="pager-btn" id="bookNext" data-act="bpg:next">下一页</button>
+  </div>
+
+  <!-- ============ 累计时长 ============ -->
+  <div class="page hidden" id="page-total">
+    <div class="card" id="sumCard">
+      <span class="card-label">总阅读时长</span>
+      <div id="bigTotal">0分钟</div>
+      <div id="sumDivider"></div>
+      <span id="sumDays">阅读天数  0天</span>
+      <span id="sumAvg">阅读日均  0分钟</span>
+    </div>
+    <div class="card" id="chartCard">
+      <button class="tgl" id="tt-week" data-act="tp:week">本周</button>
+      <button class="tgl" id="tt-year" data-act="tp:year">今年</button>
+      <button class="nv" id="totalPrev" data-act="tnav:prev">&#8249;</button>
+      <button class="nv" id="totalNext" data-act="tnav:next">&#8250;</button>
+      <span id="periodTitle"></span>
+      <div id="chart"></div>
+    </div>
+  </div>
+
+  <!-- ============ 阅读详情（日下钻页，KPW5 day_detail） ============ -->
+  <div class="page page-full hidden" id="page-daydetail">
+    <button id="ddBack" data-act="dback">返回</button>
+    <div id="ddTitle">阅读详情</div>
+    <div class="card" id="ddSummary">
+      <span id="ddDate">2026年10月10日</span>
+      <span id="ddWeekday">周六</span>
+      <div id="ddDivider"></div>
+      <span class="dd-cap" id="ddCap1">当日总时长</span>
+      <span class="dd-cap" id="ddCap2">阅读书籍</span>
+      <span id="ddTotal">0分钟</span>
+      <span id="ddCount">0本</span>
+    </div>
+    <div class="card" id="ddList">
+      <span id="ddListHead">阅读书籍明细</span>
+      <div id="ddRows"></div>
+      <div id="ddPager" class="hidden">
+        <button class="mini-btn" id="ddPrev" data-act="dpage:prev">&#8249;</button>
+        <span id="ddPageLabel">1 / 1</span>
+        <button class="mini-btn" id="ddNext" data-act="dpage:next">&#8250;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 本书详情（点书籍下钻，看这本书哪天读了多久） ============ -->
+  <div class="page page-full hidden" id="page-bookdetail">
+    <button id="bdBack" data-act="bdback">返回</button>
+    <div id="bdTitle">书籍详情</div>
+    <div class="card" id="bdSummary">
+      <span id="bdCover" class="bd-sum-cover cover-img"></span>
+      <span id="bdName"></span>
+      <span class="bd-cap" id="bdCapT">累计阅读</span>
+      <span class="bd-cap" id="bdCapD">阅读天数</span>
+      <span class="bd-val" id="bdValT"></span>
+      <span class="bd-val" id="bdValD"></span>
+      <span class="bd-cap" id="bdCapF">首次阅读</span>
+      <span class="bd-cap" id="bdCapL">最近阅读</span>
+      <span class="bd-val" id="bdValF"></span>
+      <span class="bd-val" id="bdValL"></span>
+      <span class="bd-cap" id="bdCapM">本月阅读</span>
+      <span class="bd-cap" id="bdCapP">阅读进度</span>
+      <span class="bd-val" id="bdValM"></span>
+      <span class="bd-val" id="bdValP"></span>
+    </div>
+    <div class="card" id="bdList">
+      <span id="bdListHead">阅读日历</span>
+      <span id="bdCalTitle">2026年10月</span>
+      <button id="bdCalPrev" data-act="bdcal:prev">&#8249;</button>
+      <button id="bdCalNext" data-act="bdcal:next">&#8250;</button>
+      <div id="bdWeekRow"></div>
+      <div id="bdCalGrid"></div>
+      <div id="bdCalDivider"></div>
+      <div id="bdCalSummary"></div>
+    </div>
+  </div>
+
+  <!-- 详情页专用返回热区：覆盖左上角，避免和"退出"按钮命中冲突 -->
+  <div id="backZone" class="hidden"></div>
+
+</div>
+<script src="data.js"></script>
+<script src="covers.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

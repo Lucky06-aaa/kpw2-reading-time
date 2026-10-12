@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget id="com.theo.kpw2readingtime.dashboard" version="1.0.0" viewmodes="application"
+    xmlns="http://www.w3.org/ns/widgets"
+    xmlns:kindle="http://kindle.amazon.com/ns/widget-extensions">
+    <name xml:lang="zh">KPW2 阅读时间</name>
+    <name xml:lang="en">KPW2 Reading Time</name>
+    <description xml:lang="zh">Kindle 原生阅读时长</description>
+    <content src="index.html" />
+    <kindle:gestures>
+        <kindle:param name="tap" value="yes" properties="fire_on_tap:1 max_updown_delta:0" />
+        <kindle:param name="swipe" value="yes" />
+    </kindle:gestures>
+    <feature name="http://kindle.amazon.com/apis" required="true">
+        <param name="appmgr" value="yes" />
+        <param name="gestures" value="yes" />
+        <param name="chrome" value="yes" />
+        <param name="messaging" value="yes" />
+        <param name="device" value="yes" />
+    </feature>
+    <kindle:messaging>
+        <kindle:app name="com.lab126.appmgrd" value="yes" />
+        <kindle:app name="com.lab126.chromebar" value="yes" />
+    </kindle:messaging>
+    <kindle:settings>
+        <kindle:setting name="internetRequired" value="no" />
+        <kindle:setting name="saveContext" value="no" />
+        <kindle:setting name="minimumFontSize" value="0" />
+        <kindle:setting name="enforce96DPI" value="yes" />
+    </kindle:settings>
+</widget>
