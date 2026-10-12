@@ -1,0 +1,3 @@
+# Force LF line endings everywhere (Kindle shell scripts and the WebView
+# frontend must be LF; CRLF breaks busybox sh and the old WebKit renderer).
+* text=auto eol=lf
