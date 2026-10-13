@@ -42,8 +42,14 @@
 
 ## 安装
 
-1. 下载本仓库，**把仓库里的文件整体复制到 Kindle 通过 USB 挂载出来的磁盘根目录**（也就是 `mnt/us/`）。
-   复制后，磁盘根目录应至少能看到：`RUNME.sh`、`extensions/`、`kpw2-reading-time/`、`documents/`。
+1. 下载本仓库（Code → Download ZIP，或 `git clone`），解压后**只复制下面 4 样到 Kindle 通过 USB 挂载出来的磁盘根目录**（也就是 `mnt/us/`）：
+   - `RUNME.sh`
+   - `extensions/`（整个文件夹，和已有的 KUAL 扩展合并，不会覆盖）
+   - `kpw2-reading-time/`（整个文件夹）
+   - `documents/`（整个文件夹，里面只有书库入口脚本）
+   
+   > ⚠️ **不要**把 README.md、docs/、tools/、.git* 这些也拷进去——那些是给电脑看的，拷进 Kindle 只会占空间、把书库搞乱。
+   复制后根目录应至少能看到：`RUNME.sh`、`extensions/`、`kpw2-reading-time/`、`documents/`。
 2. 安全弹出 Kindle，等它退出 USB 模式回到主界面。
 3. 在 Kindle 搜索栏输入 `;log runme` 并搜索（这是 KUAL 触发根目录 `RUNME.sh` 的方式）。
    - 第一次会执行完整安装（注册原生 WebView 应用、装后台计时服务、生成数据并打开仪表盘）。

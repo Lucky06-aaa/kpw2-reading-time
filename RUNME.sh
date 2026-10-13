@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # KPW2 reading-time adaptation installer.
-# Verified target: Kindle Paperwhite 2, firmware 5.16.2.1.1, LanguageBreak.
+# Verified target: Kindle Paperwhite 2 (pinot), firmware 5.12.2.2, KindleBreak jailbreak.
 
 BASE="/mnt/us/kpw2-reading-time"
 LEGACY_BASE="/mnt/us/kpw2-reading-time-test"
