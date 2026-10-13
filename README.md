@@ -34,6 +34,7 @@
 - **Kindle Paperwhite 2**（代号 pinot），已 **越狱（jailbreak）**。
 - 固件 5.12.x 系列（本项目实际验证于 5.12.2.2）。更老的 5.12 或相近版本通常也行，但未经测试。
 - 设备需具备：可 `mntroot rw` 改写只读系统分区、`initctl`(Upstart)、`sqlite3`、`lipc‑get‑prop`（原生框架）。
+- 打开仪表盘用的 `;log runme` 是 **KUAL**（越狱启动器）注入的搜索触发器，因此设备需已安装 KUAL 主程序。本项目不依赖 KUAL 菜单扩展，KUAL 仅提供该 `;log` 触发通道。
 
 > 未越狱、或无法 remount 系统分区的设备无法使用。
 
@@ -49,7 +50,7 @@
    > ⚠️ **不要**把 README.md、docs/、tools/、.git* 这些也拷进去——那些是给电脑看的，拷进 Kindle 只会占空间、把书库搞乱。
    复制后根目录应至少能看到：`RUNME.sh`、`kpw2-reading-time/`、`documents/`。
 2. 安全弹出 Kindle，等它退出 USB 模式回到主界面。
-3. 在 Kindle 搜索栏输入 `;log runme` 并搜索，即可触发根目录下的 `RUNME.sh`：
+3. 在 Kindle 搜索栏输入 `;log runme` 并搜索（需已安装 KUAL 越狱启动器），即可触发根目录下的 `RUNME.sh`：
    - 第一次会执行完整安装（注册原生 WebView 应用、装后台计时服务、生成数据并打开仪表盘）。
    - 之后每次 `;log runme` 都只是「打开」，不再重装，几秒内即可看到界面。
 
