@@ -9,6 +9,20 @@
 
 设计对齐 Kindle 原生日历（ui‑calendar）风格，黑白墨水屏、不滚动、固定居中。
 
+## 界面预览（真机实拍）
+
+| 每日时长 | 阅读书籍 |
+|---|---|
+| ![每日时长](docs/screenshots/01-daily.jpg) | ![阅读书籍](docs/screenshots/02-books.jpg) |
+
+| 累计时长 | 书籍详情（阅读日历） |
+|---|---|
+| ![累计时长](docs/screenshots/03-total.jpg) | ![书籍详情](docs/screenshots/04-bookdetail.jpg) |
+
+| 阅读详情（某天下钻） | 安装后在书库中的入口 |
+|---|---|
+| ![阅读详情](docs/screenshots/05-daydetail.jpg) | ![书库入口](docs/screenshots/06-library.jpg) |
+
 > 隐私：所有阅读记录只存在你的 Kindle 本地（`kpw2-reading-time/reading-time.tsv`），不上传任何云端、不含任何网络请求。
 
 ---
